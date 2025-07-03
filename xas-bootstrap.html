@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>XAS-EDITOR (Bootstrap版)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="lib/app-icon.png">
+  <link rel="apple-touch-startup-image" href="lib/splash.png">
+  <link rel="icon" href="favicon.ico">
+  <link rel="manifest" href="manifest.json">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/theme/material-darker.min.css">
+  <style>
+    body {
+      background-color: #1e1e1e;
+      color: #ffffff;
+      font-family: Consolas, 'Courier New', monospace;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+    #editorWrapper {
+      display: flex;
+      height: calc(100vh - 56px);
+    }
+    #sidebar {
+      width: 220px;
+      background-color: #252526;
+      overflow-y: auto;
+      padding: 10px;
+    }
+    #editorContainer {
+      flex-grow: 1;
+      padding: 10px;
+      background: #1e1e1e;
+    }
+    .CodeMirror {
+      height: calc(100vh - 120px);
+    }
+    .navbar-dark .navbar-nav .nav-link {
+      color: rgba(255,255,255,0.85);
+    }
+    .CodeMirror-lint-mark-error {
+      background: none;
+      border-bottom: 2px solid red;
+    }
+    .CodeMirror-lint-mark-warning {
+      background: none;
+      border-bottom: 2px solid yellow;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">XAS-EDITOR</a>
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">ファイル</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#" onclick="newFile()">新しいファイル</a></li>
+            <li><a class="dropdown-item" href="#" onclick="openFile()">ファイルを開く</a></li>
+            <li><a class="dropdown-item" href="#" onclick="saveFile()">保存</a></li>
+            <li><a class="dropdown-item" href="#" onclick="preview()">プレビュー</a></li>
+          </ul>
+        </li>
+        <!-- 他のメニュー（編集、選択など）も同様に追加可能 -->
+      </ul>
+    </div>
+  </nav>
+  <div id="editorWrapper">
+    <div id="sidebar">
+      <!-- サイドバーの内容（ファイル一覧など） -->
+    </div>
+    <div id="editorContainer">
+      <textarea id="editor">&lt;!-- ここにHTML/CSS/JSを記述 --&gt;</textarea>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/edit/closetag.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/edit/matchbrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/addon/selection/active-line.min.js"></script>
+  <script>
+    const editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
+      mode: "htmlmixed",
+      lineNumbers: true,
+      theme: "material-darker",
+      styleActiveLine: true,
+      matchBrackets: true,
+      autoCloseTags: true
+    });
+
+    function newFile() {
+      if (confirm("新しいファイルを作成しますか？")) editor.setValue("");
+    }
+
+    function openFile() {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".html,.txt,.js,.css";
+      input.onchange = e => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = () => editor.setValue(reader.result);
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+
+    function saveFile() {
+      const type = confirm("OKでHTML、キャンセルでTXT") ? "text/html" : "text/plain";
+      const blob = new Blob([editor.getValue()], { type });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = type === "text/html" ? "file.html" : "file.txt";
+      a.click();
+    }
+
+    function preview() {
+      const blob = new Blob([editor.getValue()], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    }
+  </script>
+</body>
+</html>
